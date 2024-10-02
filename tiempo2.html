@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clima API Cliente</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input { padding: 10px; margin-right: 10px; }
+        button { padding: 10px; }
+        .resultado { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Consulta del Clima</h1>
+    <input type="text" id="ciudad" placeholder="Ingrese una ciudad">
+    <button id="buscar">Buscar Clima</button>
+    <div class="resultado" id="resultado"></div>
+
+    <script>
+        const buscarBoton = document.getElementById('buscar');
+        const resultadoDiv = document.getElementById('resultado');
+
+        buscarBoton.addEventListener('click', () => {
+            const ciudad = document.getElementById('ciudad').value;
+            obtenerClima(ciudad);
+        });
+
+        async function obtenerClima(ciudad) {
+            try {
+                const respuesta = await fetch(`https://wttr.in/${ciudad}?format=%C+%t`);
+                
+                if (!respuesta.ok) {
+                    throw new Error('Ciudad no encontrada');
+                }
+
+                const datos = await respuesta.text();
+                mostrarResultado(datos);
+            } catch (error) {
+                resultadoDiv.innerHTML = `<p style="color:red;">${error.message}</p>`;
+            }
+        }
+
+        function mostrarResultado(datos) {
+            resultadoDiv.innerHTML = `<h2>Clima:</h2><p>${datos}</p>`;
+        }
+    </script>
+</body>
+</html>

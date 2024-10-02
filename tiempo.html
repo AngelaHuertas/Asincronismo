@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Clima</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #weather-status {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        #error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Estado del Clima</h1>
+    <input type="text" id="city" placeholder="Ingresa una ciudad" />
+    <button id="fetch-weather">Obtener Clima</button>
+    <div id="weather-status"></div>
+    <div id="error-message"></div>
+
+    <script>
+        const fetchWeather = async () => {
+            const city = document.getElementById('city').value;
+
+            if (!city) {
+                document.getElementById('error-message').textContent = 'Por favor, ingresa una ciudad.';
+                return;
+            }
+
+            try {
+                // Obtén las coordenadas de la ciudad utilizando Nominatim
+                const geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&format=json`);
+                const geocodeData = await geocodeResponse.json();
+
+                if (geocodeData.length === 0) {
+                    throw new Error('No se encontraron coordenadas para la ciudad.');
+                }
+
+                const { lat, lon } = geocodeData[0]; // Usar la primera coincidencia
+                const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+
+                // Obtener el clima usando las coordenadas de la ciudad
+                const weatherResponse = await fetch(apiUrl);
+                
+                if (!weatherResponse.ok) {
+                    throw new Error(`Error HTTP: ${weatherResponse.status}`);
+                }
+
+                const weatherData = await weatherResponse.json();
+                displayWeather(weatherData);
+            } catch (error) {
+                console.error('Error al obtener el clima:', error);
+                document.getElementById('error-message').textContent = 'Error al cargar el clima. Verifica la ciudad.';
+            }
+        };
+
+        const displayWeather = (data) => {
+            const weatherStatusDiv = document.getElementById('weather-status');
+            weatherStatusDiv.innerHTML = ''; // Limpiar el div antes de agregar nuevo contenido
+
+            // Mostrar información del clima
+            weatherStatusDiv.innerHTML = `
+                <h2>Clima Actual</h2>
+                <p><strong>Temperatura:</strong> ${data.current_weather.temperature} °C</p>
+                <p><strong>Viento:</strong> ${data.current_weather.windspeed} km/h</p>
+                <p><strong>Dirección del viento:</strong> ${data.current_weather.winddirection}°</p>
+            `;
+        };
+
+        // Asignar el evento al botón
+        document.getElementById('fetch-weather').addEventListener('click', fetchWeather);
+    </script>
+</body>
+</html>

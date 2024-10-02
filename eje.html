@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rick and Morty API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Personajes de Rick and Morty</h1>
+    <ul id="character-list"></ul>
+
+    <script>
+        const apiUrl = 'https://rickandmortyapi.com/api/character';
+
+        function fetchCharacters() {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayCharacters(data.results);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        function displayCharacters(characters) {
+            const characterList = document.getElementById('character-list');
+            characters.forEach(character => {
+                const li = document.createElement('li');
+
+                const img = document.createElement('img');
+                img.src = character.image;
+                img.alt = character.name;
+
+                const text = document.createElement('span');
+                text.textContent = `${character.name} - ${character.status}`;
+
+                li.appendChild(img);
+                li.appendChild(text);
+                characterList.appendChild(li);
+            });
+        }
+
+        // Llamar a la función para obtener los personajes
+        fetchCharacters();
+    </script>
+</body>
+</html>
